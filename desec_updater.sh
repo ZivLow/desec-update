@@ -31,7 +31,5 @@ update_ip() {
     done
 }
 
-# Add the script to cron to run every hour
-echo "0 * * * * $(which bash) $(pwd)/$0" | crontab -
 # Run the script once now
 update_ip
