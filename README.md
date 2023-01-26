@@ -5,7 +5,7 @@ This script updates the IP address of multiple deSEC domains.
 ## Features
 - Prompts for deSEC API key and domains if a configuration file does not exist
 - Saves the API key and domains to a configuration file for future use
-- Fetches the current IP address from a "what's my IP" API
+- Fetches the current IP from api.ipify.org
 - Updates the IP address for each domain in the list
 - Waits for 1 minutes between each request to prevent rate-limiting
 
