@@ -13,7 +13,16 @@ Updates the IP address of multiple deSEC domains.
 - ANSI colour log output
 - Counter for the number of time ran IP has been checked and IP updates performed
 
-## Usage
+## Quick install (Recommended)
+Run the following in terminal:
+```
+git clone git@github.com:ZivLow/desec-update.git
+cd desec-update
+sudo chmod +x desec_updater.sh ./config/colours.sh
+xargs sudo apt-get install -y < requirements.txt
+cp config/deSEC_config_example config/deSEC_config
+```
+## Step-by-step install
 1. Download or clone the script to your local machine
 ```
 git clone git@github.com:ZivLow/desec-update.git
@@ -23,26 +32,31 @@ cd desec-update
 ```
 sudo chmod +x desec_updater.sh ./config/colours.sh
 ```
-3. Creating new configuration file
+3. Install requirements:
 ```
-cd config
-cp deSEC_config_example deSEC_config
+xargs sudo apt-get install -y < requirements.txt
 ```
-4. Put your deSEC API key and domains in configuration file.
+4. Creating new configuration file
 ```
-nano deSEC_config
+cp config/deSEC_config_example config/deSEC_config
 ```
-Exit & save with `CTRL+X`
 
-7. Set up a crontab job using:
+## Configuring API key and domains (IMPORTANT)
+1. Put your deSEC API key and domains in configuration file.
+```
+nano config/deSEC_config
+```
+2. Save & exit with `CTRL+X`
+
+3. Set up a crontab job using:
 ```
 crontab -e
 ```
-8. Copy & paste crontab job from [crontab](config/crontab) file to your crontab.
+4. Copy & paste crontab job from [crontab](config/crontab) file to your crontab.
 ```
 */3 * * * * ${HOME}/desec-update/desec_updater.sh
 ```
-Save & exit with `CTRL+X`
+5. Save & exit with `CTRL+X`
 
 ### To test running once (optional)
 1. Go to project root directory (~/desec-update/). \
@@ -64,7 +78,8 @@ cat log/counter.log
 ```
 
 ## Note
-- Make sure you have dig, bash(>v4.3) installed on your machine
+- Make sure you have curl, dig, bash(>v4.3) installed on your machine \
+See [requirements.txt](requirements.txt) for list of packages needed.
 - You can edit the script to change the wait time between requests
 - Tested to work on Ubuntu 22.04 LTS
 

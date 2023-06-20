@@ -1,0 +1,6 @@
+curl
+bash
+grep
+sed
+dnsutils
+coreutils
