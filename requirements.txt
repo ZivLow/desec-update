@@ -2,5 +2,6 @@ curl
 bash
 grep
 sed
+cron
 dnsutils
 coreutils
