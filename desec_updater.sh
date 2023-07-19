@@ -198,6 +198,7 @@ fi
 # Only update IP record on deSEC if need to update
 if need_update "domains" "name_servers"; then
     update_ip "domains" "${api_key}"
+    update_last_check_time "last_update_time" "${COUNTER_FILE_PATH}"
     update_counter_file "update_ip_count" "${COUNTER_FILE_PATH}"
 fi
 
