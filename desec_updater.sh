@@ -16,10 +16,70 @@ function log() {
     echo -e $1 | (echo -n "[${TIMESTAMP}]    " && cat) |& tee -a "${LOGS_FILE_PATH}"
 }
 
+# Test an IP address for validity:
+# Usage:
+#      valid_ip IP_ADDRESS
+#      if [[ $? -eq 0 ]]; then echo good; else echo bad; fi
+#   OR
+#      if valid_ip IP_ADDRESS; then echo good; else echo bad; fi
+function valid_ip()
+{
+    local  ip=$1
+    local  stat=1
+
+    if [[ $ip =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+        OIFS=$IFS
+        IFS='.'
+        ip=($ip)
+        IFS=$OIFS
+        [[ ${ip[0]} -le 255 && ${ip[1]} -le 255 \
+            && ${ip[2]} -le 255 && ${ip[3]} -le 255 ]]
+        stat=$?
+    fi
+    return $stat
+}
+
 # Get the public IP address
+# $1: ip variable name,     $2: array of commands to get public ip
+# Return 0 = true (get IP success)
+# Return 1 = false (get IP fail)
 function get_public_ip() {
-    [ -z ${ip+x} ] && ip=$(dig +short myip.opendns.com @resolver1.opendns.com)
-    echo ${ip}
+
+    local -n ip_local=$1
+    local -n get_public_ip_commands_local=$2
+
+    if valid_ip ${ip_local}; then
+        # ip variable is already set
+        return 0
+    fi
+
+    for get_public_ip_command in "${get_public_ip_commands_local[@]}"; do
+
+        command_output_ip=$(${get_public_ip_command} | tr -d '"')
+
+        if valid_ip ${command_output_ip}; then
+            ip_local=${command_output_ip}
+            log "Get Public IP ${Cyan}${ip_local}${Color_Off} from command: ${Purple}${get_public_ip_command}${Color_Off}"
+            return 0
+        elif [[ ${command_output_ip} == *"timed out"* ]]; then
+            log "${BYellow}Timed out getting public IP from command: ${Purple}${get_public_ip_command}${Color_Off}"
+            update_last_check_time "last_get_ip_timed_out_time" "${COUNTER_FILE_PATH}"
+            update_counter_file "get_ip_timed_out_count" "${COUNTER_FILE_PATH}"
+        elif [ -z "${command_output_ip}" ]; then
+            log "${BRed}No answer from command: ${Purple}${get_public_ip_command} ${Color_Off}--> \"\""
+            update_last_check_time "last_get_ip_no_answer_time" "${COUNTER_FILE_PATH}"
+            update_counter_file "get_ip_no_answer_count" "${COUNTER_FILE_PATH}"
+        else
+            log "${BRed}Unknown error getting public IP from command: ${Purple}${get_public_ip_command} ${Color_Off}--> \"${command_output_ip}\""
+            update_last_check_time "last_get_ip_unknown_error_time" "${COUNTER_FILE_PATH}"
+            update_counter_file "get_ip_unknown_error_count" "${COUNTER_FILE_PATH}"
+        fi
+
+    done
+
+    # if all commands have failed to get public ip address
+    log "${BRed}Cannot get public IP from all commands!${Color_Off}"
+    return 1
 }
 
 # Update the IP address for each domain
@@ -27,7 +87,10 @@ function update_ip() {
     local -n domains_local=$1
     local api_key_local=$2
 
-    local ip=$(get_public_ip)
+    if ! get_public_ip "ip" "get_public_ip_commands"; then
+        # Cannot get public IP address
+        return 1
+    fi
 
     for domain in "${domains_local[@]}"; do
         log "Updating $domain"
@@ -36,6 +99,8 @@ function update_ip() {
         log "Waiting 60 seconds"
         sleep 60
     done
+
+    return 0
 }
 
 # Check if current public IP address is different from stored ip address
@@ -45,7 +110,10 @@ function need_update() {
     local -n domains_local=$1
     local -n name_servers_local=$2
 
-    local ip=$(get_public_ip)
+    if ! get_public_ip "ip" "get_public_ip_commands"; then
+        # Cannot get public IP address
+        return 1
+    fi
 
     for domain in "${domains_local[@]}"; do
         for name_server in "${name_servers_local[@]}"; do
