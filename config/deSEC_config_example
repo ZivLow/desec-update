@@ -1,10 +1,10 @@
 api_key=PUT_YOUR_API_KEY_HERE
 domains=("hostname.dedyn.io" "*.hostname.dedyn.io")
-name_servers=("9.9.9.9" "1.1.1.1" "ns1.desec.io" "ns2.desec.org")
-get_public_ip_commands=("dig +short myip.opendns.com @resolver1.opendns.com" 
-                        "dig +short myip.opendns.com @resolver2.opendns.com"
+name_servers=("8.8.8.8" "9.9.9.9" "1.1.1.1" "ns1.desec.io" "ns2.desec.org")
+get_public_ip_commands=("dig +short myip.opendns.com @resolver4.opendns.com" 
                         "dig +short myip.opendns.com @resolver3.opendns.com"
-                        "dig +short myip.opendns.com @resolver4.opendns.com"
+                        "dig +short myip.opendns.com @resolver2.opendns.com"
+                        "dig +short myip.opendns.com @resolver1.opendns.com"
                         "dig +short whoami.akamai.net @ns1-1.akamaitech.net"
                         "dig +short TXT o-o.myaddr.l.google.com @ns1.google.com"
                         "dig +short TXT o-o.myaddr.l.google.com @ns2.google.com"
